@@ -5,13 +5,33 @@
 #include <errno.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <fstream>
 
 using namespace std;
 
 const int maxChildProcess = 20;
 const int maxTimeSeconds = 100;
 
+struct SharedMemory {
+        bool ready;
+        bool done;
+        pid_t pgid;
+        int depth;
+        int value;
+};
+
+
+
 void usage();
+
+key_t key;
+int shmId;
+struct SharedMemory* shmem;
 
 int main(int argc, char * argv[]) {
 
@@ -48,6 +68,18 @@ int main(int argc, char * argv[]) {
 		}
 	}
 	
+	key = ftok("makefile", 'p');                                                                                    //key generated for shared memory
+
+	//allocates shared memory
+        if((shmId = shmget(key, sizeof(struct SharedMemory), IPC_CREAT | S_IRUSR | S_IWUSR)) < 0) {
+                perror("master.cpp: error: failed to allocate shared memory");
+                exit(EXIT_FAILURE);
+        }
+        else {
+                shmem = (struct SharedMemory*)shmat(shmId, NULL, 0);
+        }
+
+
 	if(argv[optind] == NULL) {
 		perror("master.cpp: error: no input file");
 		exit(EXIT_FAILURE);
@@ -55,11 +87,9 @@ int main(int argc, char * argv[]) {
 	else {
 		fileName = argv[optind];
 	}
-	
 
-	cout << userChildren << endl;
-	cout << userTime << endl;
-	cout << fileName << endl;
+	
+	
 
 	return EXIT_SUCCESS;
 
