@@ -26,13 +26,14 @@ struct SharedMemory {
         pid_t pgid;
         int depth;
         int value;
+	int vecSize;
 };
 
 void attachShmem();
 void releaseShmem();
 void deleteShmem();
+void spawnChild(int);
 void storeShmem(vector<int>, int);
-vector<int> checkNumStatus(vector<int>, int);
 
 void usage();
 
@@ -46,8 +47,6 @@ int main(int argc, char * argv[]) {
 	
 	int userChildren = 20;
 	int userTime = 100;
-
-	int vecSize;	
 
 	char * dataFile;
 
@@ -109,60 +108,53 @@ int main(int argc, char * argv[]) {
 	fclose(fp);
 	free(readLine);
 
-	vecSize = numberHolder.size();
-/*
-	for(int i = 0; i < vecSize; i++) {
-		shmem[i].value = numberHolder[i];
-		shmem[i].pgid = 0;
-		shmem[i].done = false;
-		shmem[i].ready = true;
-		shmem[i].depth = -1;
-	}
-
-
-	for(int i = 0; i < vecSize; i++) {
-		cout << shmem[i].value << endl;
-	}
-*/
-
-
-	int index= numberHolder.size();
-        int target = 0;
+	int index = numberHolder.size();
+        int depth = 0;
 
         while (index >>= 1) {
-                ++target;
+                depth++;
         }
 
-	cout << target << endl << endl << endl;
-
-        if(pow(2,target) < numberHolder.size()) {
-		
-		//target++;
-
-		cout << "AM IN THIS THING?" << endl << endl;
-		
-                //target++;
+        if(pow(2,depth) < numberHolder.size()) {
+		depth++;	
                 do {
-			cout << "target var: " << target << endl << endl;
-                        numberHolder.push_back(0);
-			cout << "size of number holder: " << numberHolder.size() << endl << endl;
-             }
-                while(pow(2,target) < numberHolder.size());
+			numberHolder.push_back(0);
+             	}
+		while(numberHolder.size() < pow(2,depth));
         }
 
+	cout << depth << " \t\t\t";
 
+	storeShmem(numberHolder, numberHolder.size());
 
+	shmem->vecSize = numberHolder.size();
+
+	execl("./bin_adder", (char *)NULL);
+
+	releaseShmem();
+	deleteShmem();
+
+	return 0;
+
+}
+
+void spawnChild(int p) {
 	
+	pid_t pid = fork();
 
+	if(pid == -1) {
+		perror("master.cpp: error: failed to create child process");
+		exit(EXIT_FAILURE);
+	}
+	
+	if(pid == 0) {
+		if(p == 0) {
+			shmem->pgid = getpid();
+		}
 
-	for(int i = 0; i < vecSize; i++)
-		cout << numberHolder.at(i) << endl;
+		setpgid(0, shmem->pgid);
 
-	//storeShmem(numberHolder, vecSize);
-
-
-	return EXIT_SUCCESS;
-
+	}
 }
 
 void attachShmem() {
@@ -207,32 +199,10 @@ void storeShmem(vector<int> vect1, int size1) {
                 shmem[i].depth = -1;
         }
 
-
         for(int i = 0; i < size1; i++) {
-                cout << shmem[i].value << endl;
+                cout << shmem[i].value << " ";
         }
-
-}
-
-vector<int> checkNumStatus(vector<int> vect2, int size2) {
-
-	int indexer = vect2.size();
-	int target = 0;
-
-	while (indexer >>= 1) {
-		++target;
-	}
-
-	if(pow(2,target) < vect2.size()) {
-		target++;
-		do {
-			vect2.push_back(0);
-		}
-		while(pow(2,target) < vect2.size());
-	}
-	
-
-	return vect2;
+	cout << endl;
 
 }
 
