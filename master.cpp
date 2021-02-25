@@ -20,22 +20,26 @@ using namespace std;
 const int maxChildProcess = 20;
 const int maxTimeSeconds = 100;
 
+
 struct SharedMemory {
         bool ready;
-        bool done;
-        pid_t pgid;
+        pid_t pid;
         int depth;
         int value;
-	int vecSize;
 };
 
 void attachShmem();
 void releaseShmem();
 void deleteShmem();
-void spawnChild(int);
+void spawnChild(int, int, int);
 void storeShmem(vector<int>, int);
+void signalHandler();
+void timer();
 
 void usage();
+
+static int pCounter = 0;
+const int MAX_CHILD = 19;
 
 key_t key;
 int shmId;
@@ -107,13 +111,12 @@ int main(int argc, char * argv[]) {
 	}
 	fclose(fp);
 	free(readLine);
+	readLine = NULL;
 
 	int index = numberHolder.size();
         int depth = 0;
 
-        while (index >>= 1) {
-                depth++;
-        }
+	depth = log(index) / log(2);	
 
         if(pow(2,depth) < numberHolder.size()) {
 		depth++;	
@@ -123,22 +126,38 @@ int main(int argc, char * argv[]) {
 		while(numberHolder.size() < pow(2,depth));
         }
 
-	cout << depth << " \t\t\t";
-
 	storeShmem(numberHolder, numberHolder.size());
 
-	shmem->vecSize = numberHolder.size();
+	bool terminateFlag = false;
 
-	execl("./bin_adder", (char *)NULL);
+	pid_t parentId = getpid();
+	
+	cout << "parentId: " << parentId << endl;
+
+	while(!terminateFlag) {
+		for(int i = 0; i < depth; i++) {
+			for(int j = 0; j<numberHolder.size() && pCounter < maxChildProcess && pCounter < 20; j+=pow(2,i+1)) {
+				int forkIndexer = j;
+				int depthIndexer = pow(2,i) + j;
+				if(shmem[forkIndexer].ready && shmem[depthIndexer].ready && shmem[forkIndexer].depth == shmem[depthIndexer].depth) {
+					shmem[forkIndexer].ready = shmem[depthIndexer].ready = false;
+					shmem[forkIndexer].depth = shmem[depthIndexer].depth = i;
+					pCounter++;
+					spawnChild(forkIndexer, i, depthIndexer);
+				}
+			}
+		}
+		terminateFlag = true;
+	}
 
 	releaseShmem();
 	deleteShmem();
 
-	return 0;
+	return EXIT_SUCCESS;
 
 }
 
-void spawnChild(int p) {
+void spawnChild(int forkIndex, int forkDepth, int number2) {
 	
 	pid_t pid = fork();
 
@@ -147,18 +166,33 @@ void spawnChild(int p) {
 		exit(EXIT_FAILURE);
 	}
 	
-	if(pid == 0) {
-		if(p == 0) {
-			shmem->pgid = getpid();
-		}
+	if(pid == 0) {	
 
-		setpgid(0, shmem->pgid);
+		int length = snprintf(NULL, 0, "%d", forkIndex);
+		char* xx1 = (char*)malloc(length + 1);
+		snprintf(xx1, length + 1, "%d", forkIndex);
+
+		length = snprintf(NULL, 0, "%d", forkDepth);
+		char* yy1 = (char*)malloc(length + 1);
+		snprintf(yy1, length + 1, "%d", forkDepth);
+
+		string xx = xx1;
+		string yy = yy1;
+
+		execl("./bin_adder", xx.c_str(), yy.c_str(), (char *)NULL);
+		free(xx1);
+		free(yy1);
+
+		xx1 = NULL;
+		yy1 = NULL;
+
+		exit(EXIT_SUCCESS);
 
 	}
 }
 
 void attachShmem() {
-	
+
 	if((shmId = shmget(key, sizeof(struct SharedMemory), IPC_CREAT | S_IRUSR | S_IWUSR)) < 0) {
                 perror("master.cpp: error: failed to allocate shared memory");
                 exit(EXIT_FAILURE);
@@ -170,7 +204,6 @@ void attachShmem() {
 }
 
 void releaseShmem() {
-
 	if(shmem != NULL) {
 		if(shmdt(shmem)) {
 			perror("master.cpp: error: failed to release shared memory");
@@ -179,8 +212,7 @@ void releaseShmem() {
 	}
 }
 
-void deleteShmem() {
-	
+void deleteShmem() {	
 	if(shmId > 0) {
 		if(shmctl(shmId, IPC_RMID, NULL) < 0) {
 			perror("master.cpp: error: failed to delete shared memory");
@@ -190,21 +222,21 @@ void deleteShmem() {
 }
 
 void storeShmem(vector<int> vect1, int size1) {
-
 	for(int i = 0; i < size1; i++) {
                 shmem[i].value = vect1[i];
-                shmem[i].pgid = 0;
-                shmem[i].done = false;
+                shmem[i].pid = 0;
+                //shmem[i].done = false;
                 shmem[i].ready = true;
                 shmem[i].depth = -1;
+		//shmem[i].itemState = idle;
         }
+}
 
-        for(int i = 0; i < size1; i++) {
-                cout << shmem[i].value << " ";
-        }
-	cout << endl;
+void signalHandler() {	
 
 }
+
+void timer(){}
 
 void usage() {
 	printf("======================================================================\n");
