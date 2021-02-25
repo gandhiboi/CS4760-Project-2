@@ -176,10 +176,7 @@ void spawnChild(int forkIndex, int forkDepth, int number2) {
 		char* yy1 = (char*)malloc(length + 1);
 		snprintf(yy1, length + 1, "%d", forkDepth);
 
-		string xx = xx1;
-		string yy = yy1;
-
-		execl("./bin_adder", xx.c_str(), yy.c_str(), (char *)NULL);
+		execl("./bin_adder", xx1, yy1, (char *)NULL);
 		free(xx1);
 		free(yy1);
 
@@ -225,10 +222,8 @@ void storeShmem(vector<int> vect1, int size1) {
 	for(int i = 0; i < size1; i++) {
                 shmem[i].value = vect1[i];
                 shmem[i].pid = 0;
-                //shmem[i].done = false;
                 shmem[i].ready = true;
                 shmem[i].depth = -1;
-		//shmem[i].itemState = idle;
         }
 }
 
