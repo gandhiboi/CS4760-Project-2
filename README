@@ -2,4 +2,85 @@
 # Kenan Krijestorac
 # 26 February 2021
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+SOURCES
+
+- https://www.tutorialspoint.com/cprogramming/c_variable_arguments.htm
+- https://stackoverflow.com/questions/5141960/get-the-current-time-in-c
+- https://www.tutorialspoint.com/inter_process_communication/inter_process_communication_shared_memory.htm
+- https://www.geeksforgeeks.org/signals-c-language/
+- https://stackoverflow.com/questions/24906080/how-to-delete-shared-memory-segment-after-some-program-failed-to-detach-from-it
+- https://stackoverflow.com/questions/29087129/how-to-calculate-the-length-of-output-that-sprintf-will-generate
+- VASYL MY SAVIOR ASSISTED ME IN SOLVING BAKERY ALGORITHM PROBLEM - WHAT VALUE I SHOULD BE PASSING TO PROCESS FUNCTION IN BIN_ADDER
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ISSUES
+
+- was not sure how to test for timer; may or may not work
+- was confused on what we should be outputting to adder_log for index so i sent the process
+  that was passed in as the ith process
+- the depth is backwards (i.e. highest depth is actually displayed as 0)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+HOW TO RUN
+
+1. Type 'make' in the terminal
+2. Run as './master' followed by options and file name; if no options are specified, it is set to default
+3. Type 'make clean' to remove executables, object files, and logs files
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VERSION CONTROL
+
+- repository is set to private; will make public 03/03/2021
+- keep forgetting to commit/push changes to github
+
+- https://github.com/gandhiboi/CS4760-Project-2
+
+Commits on Feb, 25, 2021
+removed unnecessary commented code
+
+@gandhiboi
+gandhiboi committed 5 days ago
+ 
+think I figured out fork; trouble implementing bakery alg
+
+@gandhiboi
+gandhiboi committed 5 days ago
+ 
+Commits on Feb 22, 2021
+figured out how to pad with 0s; checked shared memory; learning fork/spawning children
+
+@gandhiboi
+gandhiboi committed 8 days ago
+ 
+made sure shared memory is working
+
+@gandhiboi
+gandhiboi committed 8 days ago
+ 
+Commits on Feb 21, 2021
+finished setting up shared memory, load numbers into shared memory, etc,
+
+@gandhiboi
+gandhiboi committed 9 days ago
+ 
+Commits on Feb 20, 2021
+added struct for shared memory, allocated shared mem, generated key
+
+@gandhiboi
+gandhiboi committed 10 days ago
+ 
+Commits on Feb 19, 2021
+reads command line, error checks options, and parameters have correct values
+
+@gandhiboi
+gandhiboi committed 10 days ago
+ 
+initial commit
+
+@gandhiboi
+gandhiboi committed 10 days ago

@@ -1,10 +1,16 @@
+CC = g++
+CFLAG = -g
+
 all: master bin_adder
 
-master: master.cpp
-	g++ -o master master.cpp
+%.o: %.cpp
+	$(CC) $(CFLAG) -c $< -o $@
 
-bin_adder: bin_adder.cpp
-	g++ -o bin_adder bin_adder.cpp
+master: master.o
+	$(CC) $(CFLAG) $< -o $@
+
+bin_adder: bin_adder.o
+	$(CC) $(CFLAG) $< -o $@
 
 clean:
-	-rm master bin_adder
+	rm -f *.o *log master bin_adder
