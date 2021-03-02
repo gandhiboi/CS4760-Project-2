@@ -109,9 +109,11 @@ void process(int var1, int pidIndex, int index, int numberDepth) {
 		wait(NULL);
 		FILE * fp = fopen("adder_log", "a");
 		fprintf(fp, "%s \t%d \t%d \t%d \n", getTime(), shmem[pidIndex].pid, pidIndex, numberDepth);
-		fclose(fp);
+		fprintf(fp, "%s\t Entering the critical section\n", getTime());	
 		//cout << "bin_adder addition: " << shmem[indexer].value << endl;	
 		fflush(stdout);	
+		fprintf(fp, "%s\t Exiting the critical section\n", getTime());
+		fclose(fp);
 		/* ~~~~~~ exit critical section ~~~~~~ */
 
 		shmem->number[var1] = 0;
